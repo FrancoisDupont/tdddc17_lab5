@@ -181,12 +181,14 @@ public class QLearningController extends Controller {
 			if (new_state.equals(previous_state) && action_counter < REPEAT_ACTION_MAX) {
 				return;
 			}
-
-			double previous_reward =
-                    0.3*StateAndReward.getRewardAngle(previous_angle, previous_vx, previous_vy) +
-                    0.7*StateAndReward.getRewardHover(previous_angle, previous_vx, previous_vy);
-
-            //double previous_reward = StateAndReward.getRewardHover(previous_angle, previous_vx, previous_vy);
+			double angle_reward = StateAndReward.getRewardAngle(previous_angle, previous_vx, previous_vy);
+			double hover_reward = StateAndReward.getRewardHover(previous_angle, previous_vx, previous_vy);
+			double reward = 0.2*angle_reward + 0.8*hover_reward;
+			// promote reward if we have a good angle and hover state
+			if(angle_reward == 1 && hover_reward >= 5){
+			    reward = reward * 2;
+            }
+            double previous_reward = reward;
 
 			action_counter = 0;
 
@@ -217,7 +219,7 @@ public class QLearningController extends Controller {
 				
 				/* Only print every 10th line to reduce spam */
 				print_counter++;
-				if (print_counter % 10 == 0) {
+				if (print_counter % 50 == 0) {
 					System.out.println("ITERATION: " + iteration + " SENSORS: a=" + df.format(angle.getValue()) + " vx=" + df.format(vx.getValue()) + 
 							" vy=" + df.format(vy.getValue()) + " P_STATE: " + previous_state + " P_ACTION: " + action_str(previous_action) +
 							" P_REWARD: " + df.format(previous_reward) + " P_QVAL: " + df.format(Qtable.get(prev_stateaction)) + " Tested: "

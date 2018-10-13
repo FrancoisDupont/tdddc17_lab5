@@ -40,11 +40,12 @@ public class StateAndReward {
 
 	    String state = "unstable";
 	    if(vx < 0.5 && vx > -0.5){
-            if (vy < 0.2 && vy > 0 && vx < 0.2 && vx > -0.2){
+            if (vy < 0.2 && vy > -0.2 && vx < 0.25 && vx > -0.25){
                 state = "perfect";
-            } else if (vy < 0.5 && vy >= 0.2){
+            }
+	        else if (vy < 0.75 && vy >= 0.2){
 	            state = "hover";
-            } else if (vy >= 0.5 && vy < 4){
+            } else if (vy >= 0.75 && vy < 3){
                 state = "reach_hover";
             }
         }
