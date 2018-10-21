@@ -1,5 +1,7 @@
+import java.io.FileOutputStream;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Locale;
 import java.util.Random;
@@ -73,6 +75,17 @@ public class QLearningController extends Controller {
 		leftEngine = (RocketEngine) cso.getObjectById("rocket_engine_left");
 		rightEngine = (RocketEngine) cso.getObjectById("rocket_engine_right");
 		middleEngine = (RocketEngine) cso.getObjectById("rocket_engine_middle");
+	}
+
+
+    TestPairs pairs;
+	public void writeToFile(String filename, String content) {
+		try {
+			FileOutputStream fos = new FileOutputStream(filename, true);
+			fos.write(content.getBytes());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	
@@ -172,6 +185,63 @@ public class QLearningController extends Controller {
 	/* Main decision loop. Called every iteration by the simulator */
 	public void tick(int currentTime) {
 		iteration++;
+
+		// TODO : TO REMOVE + LES ATTRIBUTS
+        if (iteration == 10000000) {
+            String st;
+            // pour chaque état de l'angle
+            for (int i = 0; i < 4; i++) {
+                pairs = new TestPairs();
+
+                String angle;
+                if (i == 0){
+                    angle = "front";
+                } else if (i == 1){
+                    angle = "right";
+                }  else if (i == 2){
+                    angle = "left";
+                } else {
+                    angle = "reverse";
+                }
+
+                // pour chaque état du hover
+                for (int k = 0; k < 4; k++){
+
+                    String hover;
+                    if (k == 0){
+                        hover = "unstable";
+                    } else if (k == 1){
+                        hover = "perfect";
+                    }  else if (k == 2){
+                        hover = "hover";
+                    } else {
+                        hover = "reach_hover";
+                    }
+
+                    String state = angle + '_' + hover;
+                    ArrayList<String> list = new ArrayList<>();
+                    // pour chaque actions
+                    for (int j = 0; j < 7; j++) {
+                        String state_action;
+                        state_action = get_key(state, j);
+                        if (Qtable.containsKey(state_action)){
+                            list.add(Qtable.get(state_action).toString());
+                        } else {
+                            list.add("0");
+                        }
+                    }
+                    try {
+                        String content = state + " = " + list.toString() + '\n';
+                        writeToFile("output_qtables.m", content);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            }
+            System.exit(0);
+        }
+
 		if (!paused) {
 			String new_state = StateAndReward.getStateAngle(angle.getValue(), vx.getValue(), vy.getValue());
 			new_state += '_'+StateAndReward.getStateHover(angle.getValue(), vx.getValue(), vy.getValue());
